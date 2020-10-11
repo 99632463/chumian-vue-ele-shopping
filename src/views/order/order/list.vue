@@ -48,7 +48,7 @@
         <el-table
           border
           class="mt-3"
-          :data="tableData[index].list"
+          :data="tableData[index] && tableData[index].list"
           style="width: 100%"
           @selection-change="handleSelectionChange"
         >
@@ -128,7 +128,7 @@
         >
           <div class="flex-1 px-2">
             <el-pagination
-              :current-page="tableData[index].currentPage"
+              :current-page="tableData[index] && tableData[index].currentPage"
               :page-sizes="[100, 200, 300, 400]"
               :page-size="100"
               layout="total, sizes, prev, pager, next, jumper"

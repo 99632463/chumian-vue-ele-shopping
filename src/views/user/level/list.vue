@@ -195,29 +195,23 @@ export default {
     openModal(e) {
       if (!e) {
         this.form = {
-          username: "",
-          password: "",
-          nickname: "",
-          avatar: "",
-          level_id: 1,
-          phone: "",
-          email: "",
-          sex: 0,
-          status: 1,
+          name:'',
+          consume: 0,
+          times:0,
+          discont:0,
+          level:0,
+          status:1
         };
         this.editIndex = -1;
       } else {
-        this.editIndex = e.$index;
+        this.editIndex = e.$qs;
         this.form = {
-          username: e.row.username,
-          password: e.row.password,
-          nickname: e.row.nickname,
-          avatar: e.row.avatar,
-          level_id: e.row.level_id,
-          phone: e.row.phone,
-          email: e.row.email,
-          sex: e.row.sex,
-          status: e.row.status,
+          name: e.row.name,
+          consume: e.row.consume,
+          times: e.row.times,
+          discont: e.row.discont,
+          level: e.row.level,
+          status: e.row.status
         };
       }
 
@@ -233,23 +227,17 @@ export default {
     submit() {
       let msg = "";
       if (this.editIndex === -1) {
-        this.form.level = {
-            id: 1,
-            name: "普通会员",
-        }
         this.tableData.unshift(this.form);
         msg = "添加成功";
       } else {
-        const item = this.tableData[this.editIndex];
-        (item.username = this.form.username),
-          (item.password = this.form.password),
-          (item.nickname = this.form.nickname),
-          (item.avatar = this.form.avatar),
-          (item.level_id = this.form.level_id),
-          (item.phone = this.form.phone),
-          (item.email = this.form.email),
-          (item.sex = this.form.sex),
-          (item.status = this.form.status);
+        const item = this.tableData[this.editIndex]
+        
+        item.name = this.form.name,
+        item.consume = this.form.consume,
+        item.times = this.form.times,
+        item.discont = this.form.discont,
+        item.level = this.form.level,
+        item.status = this.form.status
 
         msg = "修改成功";
       }

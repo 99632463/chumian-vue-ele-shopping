@@ -10,7 +10,7 @@ const routes = [
       },
       {
         meta: { title: '商品列表' },
-        component: 'shop/goods'
+        component: 'shop/goods/list'
       },
       {
         meta: { title: '发布商品' },
@@ -18,7 +18,7 @@ const routes = [
       },
       {
         meta: { title: '相册管理' },
-        component: 'photo'
+        component: 'image'
       },
       {
         meta: { title: '分类管理' },
@@ -55,6 +55,14 @@ const routes = [
       {
         meta: { title: '会员等级' },
         component: 'user/level/list'
+      },
+      {
+        meta: { title: '基础设置' },
+        component: 'set/base'
+      },
+      {
+        meta: { title: '物流设置' },
+        component: 'set/express'
       }
     ]
   },

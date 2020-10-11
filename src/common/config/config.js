@@ -13,12 +13,12 @@ export default {
           },
           {
             icon: "el-icon-s-claim",
-            path: '/shop/goods',
+            path: '/shop/goods/list',
             name: "商品列表"
           },
           {
             icon: "el-icon-picture",
-            path: '/photo',
+            path: '/image',
             name: "相册管理"
           }
         ]
@@ -29,7 +29,7 @@ export default {
         submenu: [
           {
             icon: "el-icon-s-claim",
-            path: '/shop/goods',
+            path: '/shop/goods/list',
             name: "商品列表"
           },
           {
@@ -91,7 +91,22 @@ export default {
           }
         ]
       },
-      { name: "设置" }
+      { 
+        name: "设置",
+        subActive: '0',
+        submenu: [
+          {
+            icon: "el-icon-s-claim",
+            path: '/set/base',
+            name: "基础设置"
+          },
+          {
+            icon: "el-icon-s-claim",
+            path: '/set/express',
+            name: "物流设置"
+          }
+        ]
+      }
     ]
   }
 }

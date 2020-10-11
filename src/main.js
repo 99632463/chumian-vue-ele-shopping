@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import './plugins/axios'
 import router from './router'
 import App from './App.vue'
 import './common/plugins/elm'

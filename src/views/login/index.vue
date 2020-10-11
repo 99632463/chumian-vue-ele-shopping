@@ -15,7 +15,9 @@
                  <el-input v-model="form.password" type='password' size="medium" placeholder="请输入密码"></el-input>
                </el-form-item>
                <el-form-item>
-                 <el-button @click="login" type='primary' size="medium" class="w-100">立即登录</el-button>
+                 <el-button @click="submit" type='primary' size="medium" class="w-100" :loading='loading'>
+                   {{loading ? '登录中' : '立即登录'}}
+                 </el-button>
                </el-form-item>
              </el-form>
            </div>
@@ -26,24 +28,47 @@
 </template>
 
 <script>
+import {mapMutations} from 'vuex'
 import {form, rules} from './form'
+import loginApi from '@/api/login'
 
 export default {
   name: 'login',
   data() {
     return {
       form,
-      rules
+      rules,
+      loading: false
     }
   },
   methods: {
-    login() {
+    ...mapMutations('login', [
+      'login'
+    ]),
+    ...mapMutations('menu', [
+      'createNavBar'
+    ]),
+    submit() {
       this.$refs.ruleForm.validate(isPass => {
         if(!isPass) {
           return
         }
 
-        this.$router.push('index')
+        this.loading = true
+        loginApi.login(this.form)
+          .then(res => {
+            this.login(res.data)
+            this.createNavBar(res.data.tree)
+            this.$message({
+              message: '登录成功',
+              type: 'success'
+            })
+            this.loading = false
+            this.$router.push('index')
+          })
+          .finally(() => {
+            this.loading = false
+          })
       })
     }
   }

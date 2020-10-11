@@ -22,8 +22,8 @@
           <template slot="title">
             <el-avatar
               size="small"
-              src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
-            ></el-avatar>summer
+              :src="user.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'"
+            ></el-avatar>{{user.username}}
           </template>
           <el-menu-item index="6-1">修改</el-menu-item>
           <el-menu-item index="6-2">退出</el-menu-item>
@@ -57,33 +57,52 @@
 </template>
 
 <script>
+import {mapMutations, mapState} from 'vuex'
+import loginApi from '@/api/login'
+
 export default {
   name: "layout",
   data() {
     return {
-      nav: {},
       bran: []
     };
   },
   created() {
-    this.nav = this.$conf.nav
     this.getRouterBran()
     this.__initNav();
   },
   computed: {
+    ...mapState('login', {
+      user: state => state.user
+    }),
+    ...mapState('menu', {
+      nav: state => state.nav
+    }),
     slideMenu() {
-      return this.nav.list[this.nav.active].submenu || [];
+      const item = this.nav.list[this.nav.active]
+      return item ? item.submenu : [];
     },
     slideMenuActive: {
       get() {
-        return this.nav.list[this.nav.active].subActive || '0';
+        const item = this.nav.list[this.nav.active]
+        return item ? item.subActive : '0';
       },
       set(key) {
-        this.nav.list[this.nav.active].subActive = key;
+        const item = this.nav.list[this.nav.active]
+        item && (item.subActive = key)
       }
     }
   },
   methods: {
+    ...mapMutations('login', [
+      'logoutDestroy'
+    ]),
+    async logout(){
+      const result = await loginApi.logout()
+      this.$message.success('退出成功')
+      this.logoutDestroy()
+      this.$router.push('login')
+    },
     __initNav(){
       const active = JSON.parse(localStorage.getItem('navActive'))
       if(active) {
@@ -92,6 +111,13 @@ export default {
       } 
     },
     handleSelect(key) {
+      if(key === '6-1'){   // 修改
+        return
+      }
+      if(key === '6-2'){   // 退出
+        return this.logout()
+      }
+
       this.nav.active = key;
       if(this.slideMenu.length) {
         this.$router.push(this.slideMenu[this.slideMenuActive].path)

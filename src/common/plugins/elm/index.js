@@ -45,7 +45,9 @@ import {
   Tree,
   Switch,
   DatePicker,
-  Rate
+  Rate,
+  CheckboxGroup,
+  CheckboxButton
 } from 'element-ui';
 
 Vue.use(Button)
@@ -92,6 +94,8 @@ Vue.use(Tree)
 Vue.use(Switch)
 Vue.use(DatePicker)
 Vue.use(Rate)
+Vue.use(CheckboxGroup)
+Vue.use(CheckboxButton)
 
 
 Vue.prototype.$message = Message

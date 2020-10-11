@@ -8,6 +8,7 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
 import photoDialog from '@/components/common/photo-dialog'
 import skuDialog from '@/components/sku/sku-dialog'
 
@@ -27,7 +28,17 @@ export default {
       maxSelectImageNum: 9
     }
   },
+  mounted() {
+    this.initUser()
+    this.initNavBar()
+  },
   methods:{
+    ...mapMutations('login', [
+      'initUser'
+    ]),
+    ...mapMutations('menu', [
+      'initNavBar'
+    ]),
     chooseImage(callback, max = 9){
       this.maxSelectImageNum = max
       this.$refs.photoDialog.chooseImage(callback)
