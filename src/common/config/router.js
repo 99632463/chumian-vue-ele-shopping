@@ -63,7 +63,15 @@ const routes = [
       {
         meta: { title: '物流设置' },
         component: 'set/express'
-      }
+      },
+      {
+				meta:{title:'管理员管理'},
+				component: 'set/manager'
+			},
+			{
+				meta:{title:'交易设置'},
+				component:'set/payment'
+			},
     ]
   },
   {

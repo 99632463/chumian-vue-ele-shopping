@@ -42,14 +42,14 @@ _axios.interceptors.request.use(
     if(token && !config.noToken){
       config.headers.token = token
     }
-    if(!config.hideLoading){
-      showLoading()
-    }
+    // if(!config.hideLoading){
+    //   showLoading()
+    // }
 
     return config;
   },
   function(error) {
-    hideLoading()
+    // hideLoading()
     return Promise.reject(error);
   }
 );
@@ -61,7 +61,7 @@ _axios.interceptors.response.use(
       result = response.data;
     }
 
-    hideLoading()
+    // hideLoading()
     return result
   },
   function(error) {
@@ -69,7 +69,7 @@ _axios.interceptors.response.use(
       Message.error(error.response.data.msg)
     }
 
-    hideLoading()
+    // hideLoading()
     return Promise.reject(error);
   }
 );

@@ -9,10 +9,10 @@
     "
   >
     <el-tabs v-model="activeName">
-      <div>
-        <el-button type="primary" size="mini">添加模板</el-button>
-      </div>
       <el-tab-pane label="运费模板" name="second">
+        <div>
+          <el-button type="primary" size="mini">添加模板</el-button>
+        </div>
         <el-table border class="mt-3" :data="tableData" style="width: 100%">
           <el-table-column 
             align="center" 

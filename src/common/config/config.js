@@ -104,6 +104,16 @@ export default {
             icon: "el-icon-s-claim",
             path: '/set/express',
             name: "物流设置"
+          },
+          {
+            icon: "el-icon-s-claim",
+            name: "管理员管理",
+            pathname: "/set/manager"
+          },
+          {
+            icon: "el-icon-s-claim",
+            name: "交易设置",
+            pathname:"/set/payment"
           }
         ]
       }

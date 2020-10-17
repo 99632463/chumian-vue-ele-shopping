@@ -10,17 +10,17 @@
             style="width: 150px"
             v-model="searchForm.order"
           >
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+            <el-option label="降序" value="desc"></el-option>
+            <el-option label="升序" value="asc"></el-option>
           </el-select>
           <el-input
             class="mr-2"
             size="medium"
             style="width: 150px"
-            placeholder="输入相册名称"
+            placeholder="输入图片名称"
             v-model="searchForm.keyword"
           />
-          <el-button type="success" size="medium">搜索</el-button>
+          <el-button type="success" size="medium" @click="getImagesList">搜索</el-button>
         </div>
         <el-button type="warning" size="mini" @click="cancelSelected" v-if="chooseList">取消选中</el-button>
         <el-button type="danger" size="mini" @click="imageDel({ all:true })" v-if="chooseList">批量删除</el-button>
@@ -31,6 +31,7 @@
         <el-aside width="200px" class="bg-white border-right">
           <ul class="list-group list-group-flush">
             <album-item
+              showOptions
               v-for="(item, index) in albums"
               :key="index"
               :active="activeIndex === index"
@@ -113,8 +114,8 @@
           class="border-right h-100 d-flex align-items-center justify-content-center"
         >
           <el-button-group>
-            <el-button size="mini">上一页</el-button>
-            <el-button size="mini">下一页</el-button>
+            <el-button size="mini" :disabled='albumPage === 1' @click="changeAlbumPage('pre')">上一页</el-button>
+            <el-button size="mini" :disabled='albumPage === Math.ceil(albumTotalCount / 10)' @click="changeAlbumPage('next')">下一页</el-button>
           </el-button-group>
         </div>
         <div class="flex-1 px-2">
@@ -122,10 +123,10 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="100"
+            :page-sizes="pageSizes"
+            :page-size="pageSize"
             layout="total, sizes, prev, pager, next, jumper"
-            :total="400"
+            :total="total"
           ></el-pagination>
         </div>
       </el-footer>
@@ -171,16 +172,18 @@
 
 <script>
 import albumItem from "@/components/images/album-item";
+import imageApi from '@/api/image'
 
 export default {
   name: "photo",
+  inject: ['layout'],
   components: {
     albumItem,
   },
   data() {
     return {
       searchForm: {
-        order: "",
+        order: "desc",
         keyword: "",
       },
       albums: [],
@@ -193,59 +196,63 @@ export default {
         name: "",
         order: 0,
       },
-      imageList: [
-        {
-          id: 1,
-          name: "111",
-          isCheck: false,
-          checkOrder: 0,
-          url:
-            "https://t8.baidu.com/it/u=1484500186,1503043093&fm=79&app=86&size=h300&n=0&g=4n&f=jpeg?sec=1598784083&t=2113acb0480b03c4e07d4512fb4c5565",
-        },
-        {
-          id: 2,
-          name: "222",
-          isCheck: false,
-          checkOrder: 0,
-          url:
-            "https://t8.baidu.com/it/u=1484500186,1503043093&fm=79&app=86&size=h300&n=0&g=4n&f=jpeg?sec=1598784083&t=2113acb0480b03c4e07d4512fb4c5565",
-        },
-        {
-          id: 3,
-          name: "333",
-          isCheck: false,
-          checkOrder: 0,
-          url:
-            "https://t8.baidu.com/it/u=1484500186,1503043093&fm=79&app=86&size=h300&n=0&g=4n&f=jpeg?sec=1598784083&t=2113acb0480b03c4e07d4512fb4c5565",
-        },
-        {
-          id: 4,
-          name: "444",
-          isCheck: false,
-          checkOrder: 0,
-          url:
-            "https://t8.baidu.com/it/u=1484500186,1503043093&fm=79&app=86&size=h300&n=0&g=4n&f=jpeg?sec=1598784083&t=2113acb0480b03c4e07d4512fb4c5565",
-        },
-      ],
+      imageList: [],
       chooseList: [],
-      currentPage: 1
+      albumPage: 1,
+      albumTotalCount: 0,
+      currentPage: 1,
+      pageSize: 10,
+      pageSizes: [10, 20, 50, 100],
+      total: 10
     };
   },
   mounted() {
     this.__init();
   },
   methods: {
-    __init() {
-      for (let i = 0; i < 20; i++) {
-        this.albums.push({
-          name: "相册" + i,
-          num: 20,
-          order: 0,
-        });
+    async __init() {
+      this.layout.startLoading()
+      const albumData = await imageApi.getImageClass(this.albumPage)
+      this.layout.endLoading()
+      
+      this.albums = albumData.data.list || []
+      this.albumTotalCount = albumData.data.totalCount
+
+      this.getImagesList()
+    },
+    changeAlbumPage(type){
+      if(type === 'pre'){
+        this.albumPage--
+      } else if(type === 'next'){
+        this.albumPage++
       }
+      this.__init()
+    },
+    async getImagesList(){
+      this.layout.startLoading()
+      const imageData = await imageApi.getImageClassList({
+        id: this.albums[this.activeIndex].id,
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        order: this.searchForm.order,
+        keyword: this.searchForm.keyword
+      })
+      this.imageList = imageData.data.list.map(item => {
+        return {
+          id: item.id,
+          name: item.name,
+          url: item.url,
+          isCheck: false,
+          checkOrder: 0,
+        }
+      })
+
+      this.total = imageData.data.totalCount
+      this.layout.endLoading()
     },
     changeAblum(index) {
       this.activeIndex = index;
+      this.getImagesList()
     },
     delAlbum(index) {
       this.$confirm("您确认要删除此相册吗?", "提示", {
@@ -267,6 +274,7 @@ export default {
         this.albumForm.order = item.order;
         this.albumEditIndex = index;
         this.albumModelTitle = "修改相册";
+
         return (this.albumModelVisible = true);
       }
 
@@ -275,12 +283,16 @@ export default {
       this.albumEditIndex = -1;
       this.albumModelVisible = true;
     },
-    confirmAlbumModel() {
+    async confirmAlbumModel() {
       // update
       if (this.albumEditIndex > -1) {
         // update
-        this.albums[this.albumEditIndex].name = this.albumForm.name;
-        this.albums[this.albumEditIndex].order = this.albumForm.order;
+        const item = this.albums[this.albumEditIndex]
+        const result = await imageApi.updateImageClass({
+          id: item.id,
+          data: this.albumForm
+        })
+        this.__init()
       } else {
         // create
         this.albums = [
@@ -365,10 +377,13 @@ export default {
       });
     },
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
+      this.pageSize = val
+      this.getImagesList()
     },
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
+      console.log('val: ', val);
+      this.currentPage = val
+      this.getImagesList()
     },
     cancelSelected() {
       this.imageList.forEach(image => {

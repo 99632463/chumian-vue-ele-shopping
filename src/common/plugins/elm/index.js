@@ -47,7 +47,8 @@ import {
   DatePicker,
   Rate,
   CheckboxGroup,
-  CheckboxButton
+  CheckboxButton,
+  Loading
 } from 'element-ui';
 
 Vue.use(Button)
@@ -98,7 +99,9 @@ Vue.use(CheckboxGroup)
 Vue.use(CheckboxButton)
 
 
+Vue.prototype.$loading = Loading.service;
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
+Vue.prototype.$prompt = MessageBox.prompt
 Vue.prototype.$prompt = MessageBox.prompt
   

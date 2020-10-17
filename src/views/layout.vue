@@ -62,9 +62,15 @@ import loginApi from '@/api/login'
 
 export default {
   name: "layout",
+  provide() {
+    return {
+      layout: this
+    }
+  },
   data() {
     return {
-      bran: []
+      bran: [],
+      loadingInstance: null
     };
   },
   created() {
@@ -97,6 +103,14 @@ export default {
     ...mapMutations('login', [
       'logoutDestroy'
     ]),
+    startLoading(){
+      this.loadingInstance = this.$loading({
+        target: '.el-main'
+      })
+    },
+    endLoading() {
+      this.loadingInstance && this.loadingInstance.close()
+    },
     async logout(){
       const result = await loginApi.logout()
       this.$message.success('退出成功')
