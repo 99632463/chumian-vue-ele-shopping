@@ -152,12 +152,16 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="上传图片" width="50%" :visible.sync="uploadModelVisible">
+    <el-dialog title="上传图片" width="50%" :visible.sync="uploadModelVisible" @close="__init()">
       <el-upload
         class="upload-demo text-center"
         drag
-        action="https://jsonplaceholder.typicode.com/posts/"
+        action="admin/image/upload"
         multiple
+        :headers="{token: token}"
+        name='img'
+        :data='{image_class_id: getImageClassId}'
+        :on-success="uploadImage"
       >
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">
@@ -206,8 +210,16 @@ export default {
       total: 10
     };
   },
+  created() {
+    this.token = localStorage.getItem('token')
+  },
   mounted() {
     this.__init();
+  },
+  computed:{
+    getImageClassId(){
+      return this.albums[this.activeIndex]?.id
+    }
   },
   methods: {
     async __init() {
@@ -260,11 +272,18 @@ export default {
         confirmButtonText: "确认",
         cancelButtonText: "取消",
       }).then(() => {
-        this.$message({
-          type: "success",
-          message: "删除成功 !",
-        });
-        this.albums.splice(index, 1);
+        const id = this.albums[index].id
+        imageApi.deleteImageClass(id)
+          .then(res => {
+            this.$message({
+              type: "success",
+              message: "删除成功 !",
+            });
+            this.__init()
+          })
+          .catch(err => {
+            this.layout.endLoading()
+          })
       });
     },
     openAlbumModel(obj) {
@@ -295,19 +314,33 @@ export default {
         this.__init()
       } else {
         // create
-        this.albums = [
-          {
-            name: this.albumForm.name,
-            order: this.albumForm.order,
-            num: 0,
-          },
-          ...this.albums,
-        ];
+        // this.albums = [
+        //   {
+        //     name: this.albumForm.name,
+        //     order: this.albumForm.order,
+        //     num: 0,
+        //   },
+        //   ...this.albums,
+        // ];
+        this.layout.startLoading()
+        imageApi.createImageClass(this.albumForm)
+        .then(res => {
+          this.albumModelVisible = false;
+          this.layout.endLoading()
+          this.__init()
+        })
+        .catch(err => {
+          this.layout.endLoading()
+        })
       }
-
-      this.albumModelVisible = false;
     },
     previewImage() {},
+    uploadImage(response, file, fileList){
+      console.log('fileList: ', fileList);
+      console.log('file: ', file);
+      console.log('response: ', response);
+
+    },
     editImageInfo(item) {
       this.$prompt("请输入邮箱", "提示", {
         confirmButtonText: "确定",

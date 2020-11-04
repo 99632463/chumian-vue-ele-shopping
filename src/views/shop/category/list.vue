@@ -18,7 +18,7 @@
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <div>
-          <el-input v-if='data.editStatus' v-model="data.label" size="mini" placeholder="请输入内容"></el-input>
+          <el-input v-if='data.editStatus' v-model="data.name" size="mini" placeholder="请输入内容"></el-input>
           <span v-else>{{ node.label }}</span>
         </div>
         <span>
@@ -39,39 +39,41 @@
 <script>
 export default {
   name: "shop-category-list",
+  inject: ['layout'],
   data() {
     return {
-      data: [
-        {
-          id: 1,
-          label: "一级 1",
-          editStatus: false,
-          status: 1,
-          children: [
-            {
-              id: 2,
-              label: "二级 1-1",
-              editStatus: false,
-              status: 1,
-              children: [
-                {
-                  id: 3,
-                  label: "三级 1-1-1",
-                  editStatus: false,
-                  status: 1,
-                },
-              ],
-            },
-          ],
-        }
-      ],
+      data: [],
       defaultProps: {
-        children: "children",
-        label: "label",
+        children: "child",
+        label: "name",
       },
     };
   },
+  mounted(){
+    this.__init()
+  },
   methods: {
+    __init(){
+      this.layout.startLoading()
+      this.axios.get('/admin/category')
+        .then(({data}) => {
+          let addEditStatus = (data) => {
+            data.forEach(item => {
+              item.editStatus = false
+              if(item.child.length > 0) {
+                addEditStatus(item.child)
+              }
+            })
+          }
+
+          addEditStatus(data)
+          this.data = data
+          this.layout.endLoading()
+        })
+        .catch(err => {
+          this.layout.endLoading()
+        })
+    },
     handleNodeClick(data) {
       console.log(data);
     },
@@ -79,6 +81,7 @@ export default {
       data.status = data.status ? 0 : 1
     },
     edit(data){
+      console.log('data: ', data);
       data.editStatus = !data.editStatus
     },
     remove(node, data){
@@ -93,12 +96,12 @@ export default {
     append(data){
       let newObj = {
         id: 2,
-        label: 'xxxx',
+        name: 'xxxx',
         status: 1,
         editStatus: true,
         children: []
       }
-      data.children.push(newObj)
+      data.child.push(newObj)
     },
     nodeDrop(befor, after, inner, event){
 
