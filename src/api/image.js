@@ -19,3 +19,16 @@ api.createImageClass = query => {
 api.deleteImageClass = id => {
   return axios.delete(`/admin/imageclass/${id}`)
 }
+
+api.deleteImage = id => {
+  return axios.delete(`/admin/image/${id}`)
+}
+
+api.deleteAllImage = query => {
+  return axios.post(`/admin/image/delete_all`, query)
+}
+
+api.updateImage = query => {
+  return axios.post(`/admin/image/${query.id}`, { name: query.name })
+}
+

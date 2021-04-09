@@ -94,7 +94,7 @@
                           size="mini"
                         ></el-button>
                         <el-button
-                          @click="imageDel({index})"
+                          @click="imageDel({ index, item })"
                           class="p-2"
                           icon="el-icon-delete"
                           size="mini"
@@ -339,7 +339,6 @@ export default {
       console.log('fileList: ', fileList);
       console.log('file: ', file);
       console.log('response: ', response);
-
     },
     editImageInfo(item) {
       this.$prompt("请输入邮箱", "提示", {
@@ -347,11 +346,14 @@ export default {
         cancelButtonText: "取消",
         inputValue: item.name,
       }).then(({ value }) => {
-        item.name = value;
-        this.$message({
-          type: "success",
-          message: "修改成功",
-        });
+        imageApi.updateImage({ id: item.id, name: value })
+          .then(res => {
+            this.$message({
+              type: "success",
+              message: "修改成功",
+            });
+            this.__init()
+          })
       });
     },
     selectImage(item) {
@@ -400,13 +402,15 @@ export default {
           this.imageList = list;
           this.chooseList = [];
         } else {
-          this.imageList.splice(obj.index, 1);
+          imageApi.deleteImage(obj.item.id)
+            .then(res => {
+              this.$message({
+                type: "success",
+                message: "删除成功 !",
+              });
+              this.__init()
+            })
         }
-
-        this.$message({
-          type: "success",
-          message: "删除成功 !",
-        });
       });
     },
     handleSizeChange(val) {
