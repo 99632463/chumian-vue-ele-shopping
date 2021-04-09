@@ -36,7 +36,7 @@
       <el-table-column label="类型名称" prop="name"> </el-table-column>
       <el-table-column prop="value" label="属性标签" width="380" align="center">
         <template slot-scope="scope">
-          <div>{{ scope.row.value_list | filterValueList }}</div>
+          <div>{{ scope.row.goods_type_values | filterValueList }}</div>
         </template>
       </el-table-column>
       <el-table-column
@@ -84,11 +84,13 @@
     >
       <div class="flex-1 px-2">
         <el-pagination
-          :current-page="currentPage"
-          :page-sizes="[100, 200, 300, 400]"
-          :page-size="100"
+          :current-page="page.currentPage"
+          :page-sizes="page.sizes"
+          :page-size="page.size"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="400"
+          :total="page.total"
+          @size-change='handleSizeChange'
+          @current-change='handleCurrentChange'
         ></el-pagination>
       </div>
     </el-footer>
@@ -198,41 +200,18 @@
 
 <script>
 import buttonSearch from "@/components/common/button-search";
+import common from '@/common/mixins/common'
 
 export default {
   components: {
     buttonSearch,
   },
+  mixins: [common],
   data() {
     return {
-      tableData: [
-        {
-          id: 1,
-          name: "鞋子",
-          order: 50,
-          status: 1,
-          sku_list: [
-            { id: 1, name: "颜色" },
-            { id: 2, name: "尺寸" },
-          ],
-          value_list: [
-            {
-              order: 50,
-              name: "特性",
-              type: "input",
-              value: "",
-            },
-            {
-              order: 50,
-              name: "前置摄像机",
-              type: "input",
-              value: "",
-            },
-          ],
-        },
-      ],
+      preUrl: 'goods_type',
+      tableData: [],
       currentPage: 1,
-      multipleSelection: [],
       createModal: false,
       value_list: [
         {
@@ -297,9 +276,6 @@ export default {
       }
 
       this.createModal = true;
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
     },
     changeStatus(item) {
       item.status = !item.status;

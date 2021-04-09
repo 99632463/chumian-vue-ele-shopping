@@ -27,7 +27,7 @@
       >
       </el-table-column>
       <el-table-column
-        prop="value"
+        prop="default"
         label="规格值"
         width="380"
         align="center"
@@ -58,7 +58,7 @@
               type="danger"
               size="mini"
               plain
-              @click="deleteItem(scope)"
+              @click="deleteItem(scope.row)"
               >删除</el-button
             >
           </el-button-group>
@@ -72,17 +72,19 @@
     >
       <div class="flex-1 px-2">
         <el-pagination
-          :current-page="currentPage"
-          :page-sizes="[100, 200, 300, 400]"
-          :page-size="100"
+          :current-page="page.currentPage"
+          :page-sizes="page.sizes"
+          :page-size="page.size"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="400"
+          :total="page.total"
+          @size-change='handleSizeChange'
+          @current-change='handleCurrentChange'
         ></el-pagination>
       </div>
     </el-footer>
 
     <el-dialog
-      title="添加规格"
+      :title="editIndex > -1 ? '修改规格' : '添加规格'"
       :visible.sync="createModal"
       top="5vh"
     >
@@ -106,12 +108,12 @@
             <el-radio :label="2" border>图片</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="规格值" prop="value">
+        <el-form-item label="规格值" prop="default">
           <el-input 
             type="textarea" 
             :rows="3" 
             placeholder="一行为一个规格项，多个规格项用换行输入"
-            v-model="form.value"
+            v-model="form.default"
           >
           </el-input>
         </el-form-item>
@@ -126,40 +128,24 @@
 
 <script>
 import buttonSearch from "@/components/common/button-search";
+import common from '@/common/mixins/common'
 
 export default {
   components: {
     buttonSearch,
   },
+  mixins: [common],
   data() {
     return {
-      tableData: [
-        {
-          id: 1,
-          name:'颜色',
-          value:'棕色，蓝色',
-          order:50,
-          status:1,
-          type: 0
-        },
-        {
-          id: 2,
-          name:'颜色',
-          value:'棕色，蓝色',
-          order:50,
-          status:1,
-          type: 0
-        }
-      ],
-      currentPage: 1,
-      multipleSelection: [],
+      preUrl: 'skus',
+      tableData: [],
       createModal: false,
       form:{
         name:'',
         order:50,
         status:1,
         type:0,
-        value:''
+        default:''
       },
       rules: {
         name: [
@@ -169,7 +155,7 @@ export default {
             trigger: 'blur'
           }
         ],
-        value: [
+        default: [
           {
             required: true,
             message: '规格值不能为空',
@@ -179,9 +165,6 @@ export default {
       },
       editIndex: -1
     };
-  },
-  mounted() {
-
   },
   methods: {
     deleteAll(){
@@ -201,7 +184,7 @@ export default {
           order:50,
           status:1,
           type:0,
-          value:''
+          default:''
         }
         this.editIndex = -1
       }
@@ -212,38 +195,57 @@ export default {
           order: e.row.order,
           status: e.row.status,
           type: e.row.type,
-          value: e.row.value
+          default: e.row.value
         }
       }
       
       this.createModal = true
     },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
-    },
     changeStatus(item) {
-      item.status = !item.status
-      this.$message({
-        message: item.status ? '禁用' : '启用',
-        type: 'success'
+      let status = item.status === 1 ? 0 : 1
+      let msg = status === 1 ? '启用' : '禁用'
+
+      this.layout.startLoading()
+      this.axios.post('/admin/skus/' + item.id + '/update_status', {
+        status
       })
+        .then(res => {
+          item.status = status
+          this.$message({
+            message: msg + '成功',
+            type: 'success'
+          })
+          this.layout.endLoading()
+        })
+        .catch(err => {
+          this.layout.endLoading()
+        })
     },
     submit(){
       this.$refs.form.validate(res => {
         if(res){
           let msg = ''
           if(this.editIndex === -1){
-            this.form.value = this.form.value.replace(/\n/, ',')
-            this.tableData.unshift(this.form)
+            this.form.default = this.form.default.replace(/\n/, ',')
             msg = '添加成功'
+
+            this.axios.post('/admin/skus', this.form)
+              .then(res => {
+                this.getList()
+              })
           } else {
             const item = this.tableData[this.editIndex]
             item.name = this.form.name
             item.order = this.form.order
             item.status = this.form.status
             item.type = this.form.type
-            item.value = this.form.value
+            item.default = this.form.default
             msg = '修改成功'
+
+            this.axios.post('/admin/skus/' + item.id, this.form)
+              .then(res => {
+                this.getList()
+              })
           }
 
           this.createModal = false
@@ -254,8 +256,11 @@ export default {
         }
       })
     },
-    deleteItem(scope){
-      this.tableData.splice(scope.$index, 1)
+    deleteItem(item){
+      this.axios.post('/admin/skus/' + item.id + '/delete')
+        .then(res => {
+          this.getList()
+        })
     }
   },
 };

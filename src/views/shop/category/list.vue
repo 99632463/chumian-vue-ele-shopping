@@ -81,27 +81,58 @@ export default {
       data.status = data.status ? 0 : 1
     },
     edit(data){
-      console.log('data: ', data);
-      data.editStatus = !data.editStatus
+      if (!data.editStatus) {
+         return data.editStatus = true 
+      }
+      this.axios.post('/admin/category/' + data.id, {
+        status: data.status,
+        name: data.name,
+        category_id: data.category_id
+      }).then(res => {
+        data.editStatus = false
+        this.$message({
+          type: 'success',
+          message: '修改成功'
+        })
+      })
     },
     remove(node, data){
-      const parent = node.parent
-      const children = parent.data.children || parent.data
+      // const parent = node.parent
+      // const children = parent.data.children || parent.data
 
-      let index = children.findIndex(v => v.id === data.id)
-      if(index > -1){
-        children.splice(index, 1)
-      }
+      // let index = children.findIndex(v => v.id === data.id)
+      // if(index > -1){
+      //   children.splice(index, 1)
+      // }
+      this.axios.delete('/admin/category/' + data.id)
+        .then(res => {
+          this.__init()
+          this.$message({
+            type: 'success',
+            message: '删除成功'
+          })
+        })
     },
     append(data){
-      let newObj = {
-        id: 2,
-        name: 'xxxx',
-        status: 1,
-        editStatus: true,
-        children: []
-      }
-      data.child.push(newObj)
+      // let newObj = {
+      //   id: 2,
+      //   name: 'xxxx',
+      //   status: 1,
+      //   editStatus: true,
+      //   children: []
+      // }
+      // data.child.push(newObj)
+
+      this.axios.post('/admin/category', {
+        status: 0,
+        name: '新分类',
+        category_id: data.id
+      }).then(res => {
+        let obj = res.data
+        obj.editStatus = true
+        obj.children = []
+        data.child.push(obj)
+      })
     },
     nodeDrop(befor, after, inner, event){
 
@@ -118,8 +149,17 @@ export default {
         }
       })
       .then(({ value }) => {
-        console.log('value: ', value);
-        
+        this.axios.post('/admin/category', {
+          status: 0,
+          category_id: 0,
+          name: value
+        }).then(res => {
+          this.__init()
+          this.$message({
+            message: '创建成功',
+            type: 'success'
+          })
+        })
       })
     }
   }
