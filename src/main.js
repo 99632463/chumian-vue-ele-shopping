@@ -7,7 +7,7 @@ import $conf from './common/config/config'
 import directives from './common/directives'
 import store from './store'
 
-console.log('test5');
+console.log('test1');
 
 import VueDND from 'awe-dnd'
 Vue.use(VueDND)
